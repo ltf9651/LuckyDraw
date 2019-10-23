@@ -7,5 +7,5 @@ const SysTimeformShort = "2006-01-02"
 
 var SysTimeLocation, _ = time.LoadLocation("Asia/Shanghai")
 
-var SingnSecret = []byte("056qwd65w10")
+var SignSecret = []byte("056qwd65w10")
 var CookieSecret = "helloWorld"
