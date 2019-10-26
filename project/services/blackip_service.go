@@ -9,7 +9,7 @@ import (
 	"LuckyDraw/project/datasource"
 	"LuckyDraw/project/models"
 	"fmt"
-	"go-common/library/cache/redis"
+	"github.com/gomodule/redigo/redis"
 	"log"
 	"sync"
 )
