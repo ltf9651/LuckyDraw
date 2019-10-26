@@ -1,25 +1,27 @@
+/**
+ * 抽奖系统的数据库操作
+ */
 package dao
 
 import (
 	"LuckyDraw/project/models"
 	"github.com/go-xorm/xorm"
-	"log"
 )
 
-type BliackIpDao struct {
+type BlackipDao struct {
 	engine *xorm.Engine
 }
 
-func NewBliackIpDao(engine *xorm.Engine) *BliackIpDao {
-	return &BliackIpDao{
+func NewBlackipDao(engine *xorm.Engine) *BlackipDao {
+	return &BlackipDao{
 		engine: engine,
 	}
 }
 
-func (d *BliackIpDao) Get(id int) *models.Gift {
-	data := &models.Gift{Id: id}
+func (d *BlackipDao) Get(id int) *models.LtBlackip {
+	data := &models.LtBlackip{Id: id}
 	ok, err := d.engine.Get(data)
-	if ok && err != nil {
+	if ok && err == nil {
 		return data
 	} else {
 		data.Id = 0
@@ -27,21 +29,23 @@ func (d *BliackIpDao) Get(id int) *models.Gift {
 	}
 }
 
-func (d *BliackIpDao) GetAll() []models.Gift {
-	datalist := make([]models.Gift, 0)
+func (d *BlackipDao) GetAll(page, size int) []models.LtBlackip {
+	offset := (page - 1) * size
+	datalist := make([]models.LtBlackip, 0)
 	err := d.engine.
-		Asc("sys_status").
-		Asc("displaycode").
+		Desc("id").
+		Limit(size, offset).
 		Find(&datalist)
 	if err != nil {
-		log.Println("error=", err)
+		return datalist
+	} else {
 		return datalist
 	}
-	return datalist
 }
 
-func (d *BliackIpDao) CountAll() int64 {
-	num, err := d.engine.Count(&models.Gift{})
+func (d *BlackipDao) CountAll() int64 {
+	num, err := d.engine.
+		Count(&models.LtBlackip{})
 	if err != nil {
 		return 0
 	} else {
@@ -49,31 +53,46 @@ func (d *BliackIpDao) CountAll() int64 {
 	}
 }
 
-func (d *BliackIpDao) Delete(id int) error {
-	data := &models.Gift{Id: id, SysStatus: 1}
-	_, err = d.engine.Id(data.id).Update(data)
+func (d *BlackipDao) Search(ip string) []models.LtBlackip {
+	datalist := make([]models.LtBlackip, 0)
+	err := d.engine.
+		Where("ip=?", ip).
+		Desc("id").
+		Find(&datalist)
+	if err != nil {
+		return datalist
+	} else {
+		return datalist
+	}
+}
+
+//func (d *BlackipDao) Delete(id int) error {
+//	data := &models.LtBlackip{Id: id, SysStatus: 1}
+//	_, err := d.engine.Id(data.Id).Update(data)
+//	return err
+//}
+
+func (d *BlackipDao) Update(data *models.LtBlackip, columns []string) error {
+	_, err := d.engine.Id(data.Id).MustCols(columns...).Update(data)
 	return err
 }
 
-func (d *BliackIpDao) Update(data *models.Gift, columns []string) error {
-	_, err = d.engine.Id(data.id).MustCols(columns...).Update(data)
-	return err
-}
-
-func (d *BliackIpDao) Create(data *models.Gift) error {
+func (d *BlackipDao) Create(data *models.LtBlackip) error {
 	_, err := d.engine.Insert(data)
 	return err
 }
 
-func (d *BliackIpDao) GetByIp(ip string) *models.BlackIpList {
-	datalist := make([]models.BlackIpList, 0)
+// 根据IP获取信息
+func (d *BlackipDao) GetByIp(ip string) *models.LtBlackip {
+	datalist := make([]models.LtBlackip, 0)
 	err := d.engine.
 		Where("ip=?", ip).
-		Asc("id").
+		Desc("id").
 		Limit(1).
 		Find(&datalist)
 	if err != nil || len(datalist) < 1 {
 		return nil
+	} else {
+		return &datalist[0]
 	}
-	return &datalist[0]
 }

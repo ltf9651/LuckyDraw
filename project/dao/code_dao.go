@@ -1,9 +1,11 @@
+/**
+ * 抽奖系统的数据库操作
+ */
 package dao
 
 import (
 	"LuckyDraw/project/models"
 	"github.com/go-xorm/xorm"
-	"log"
 )
 
 type CodeDao struct {
@@ -16,10 +18,10 @@ func NewCodeDao(engine *xorm.Engine) *CodeDao {
 	}
 }
 
-func (d *CodeDao) Get(id int) *models.Gift {
-	data := &models.Gift{Id: id}
+func (d *CodeDao) Get(id int) *models.LtCode {
+	data := &models.LtCode{Id: id}
 	ok, err := d.engine.Get(data)
-	if ok && err != nil {
+	if ok && err == nil {
 		return data
 	} else {
 		data.Id = 0
@@ -27,20 +29,23 @@ func (d *CodeDao) Get(id int) *models.Gift {
 	}
 }
 
-func (d *CodeDao) GetAll() []models.Gift {
-	datalist := make([]models.Gift, 0)
+func (d *CodeDao) GetAll(page, size int) []models.LtCode {
+	offset := (page - 1) * size
+	datalist := make([]models.LtCode, 0)
 	err := d.engine.
-		Asc("id").
+		Desc("id").
+		Limit(size, offset).
 		Find(&datalist)
 	if err != nil {
-		log.Println("error=", err)
+		return datalist
+	} else {
 		return datalist
 	}
-	return datalist
 }
 
 func (d *CodeDao) CountAll() int64 {
-	num, err := d.engine.Count(&models.Gift{})
+	num, err := d.engine.
+		Count(&models.LtCode{})
 	if err != nil {
 		return 0
 	} else {
@@ -48,18 +53,64 @@ func (d *CodeDao) CountAll() int64 {
 	}
 }
 
+func (d *CodeDao) CountByGift(giftId int) int64 {
+	num, err := d.engine.
+		Where("gift_id=?", giftId).
+		Count(&models.LtCode{})
+	if err != nil {
+		return 0
+	} else {
+		return num
+	}
+}
+
+func (d *CodeDao) Search(giftId int) []models.LtCode {
+	datalist := make([]models.LtCode, 0)
+	err := d.engine.
+		Where("gift_id=?", giftId).
+		Desc("id").
+		Find(&datalist)
+	if err != nil {
+		return datalist
+	} else {
+		return datalist
+	}
+}
+
 func (d *CodeDao) Delete(id int) error {
-	data := &models.Gift{Id: id, SysStatus: 1}
-	_, err = d.engine.Id(data.id).Update(data)
+	data := &models.LtCode{Id: id, SysStatus: 1}
+	_, err := d.engine.Id(data.Id).Update(data)
 	return err
 }
 
-func (d *CodeDao) Update(data *models.Gift, columns []string) error {
-	_, err = d.engine.Id(data.id).MustCols(columns...).Update(data)
+func (d *CodeDao) Update(data *models.LtCode, columns []string) error {
+	_, err := d.engine.Id(data.Id).MustCols(columns...).Update(data)
 	return err
 }
 
-func (d *CodeDao) Create(data *models.Gift) error {
+func (d *CodeDao) Create(data *models.LtCode) error {
 	_, err := d.engine.Insert(data)
+	return err
+}
+
+// 找到下一个可用的最小的优惠券
+func (d *CodeDao) NextUsingCode(giftId, codeId int) *models.LtCode {
+	datalist := make([]models.LtCode, 0)
+	err := d.engine.Where("gift_id=?", giftId).
+		Where("sys_status=?", 0).
+		Where("id>?", codeId).
+		Asc("id").Limit(1).
+		Find(&datalist)
+	if err != nil || len(datalist) < 1 {
+		return nil
+	} else {
+		return &datalist[0]
+	}
+}
+
+// 根据唯一的code来更新
+func (d *CodeDao) UpdateByCode(data *models.LtCode, columns []string) error {
+	_, err := d.engine.Where("code=?", data.Code).
+		MustCols(columns...).Update(data)
 	return err
 }

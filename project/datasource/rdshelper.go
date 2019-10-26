@@ -1,13 +1,12 @@
 package datasource
 
 import (
+	"LuckyDraw/project/conf"
 	"fmt"
+	"github.com/gomodule/redigo/redis"
 	"log"
 	"sync"
 	"time"
-
-	"github.com/gomodule/redigo/redis"
-	"imooc.com/lottery/conf"
 )
 
 var rdsLock sync.Mutex
