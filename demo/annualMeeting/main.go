@@ -21,6 +21,7 @@ type lotteryController struct {
 //返回iris的Application
 func newApp() *iris.Application {
 	app := iris.New()
+	// Party 路由分组
 	mvc.New(app.Party("/")).Handle(&lotteryController{})
 	return app
 }
