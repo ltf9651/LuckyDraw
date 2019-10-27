@@ -1,8 +1,10 @@
 package controller
 
 import (
+	comm "LuckyDraw/project/common"
 	"LuckyDraw/project/models"
 	"LuckyDraw/project/services"
+	"fmt"
 	"github.com/kataras/iris"
 )
 
@@ -44,4 +46,21 @@ func (c *IndexController) GetNewprize() map[string]interface{} {
 	rs["msg"] = ""
 	// TODO
 	return rs
+}
+
+func (c *IndexController) GetLogin() {
+	uid := comm.Random(10000)
+	loginuser := models.ObjLoginuser{
+		Uid:      uid,
+		Username: fmt.Sprintf("user-%d", uid),
+		Now:      comm.NowUnix(),
+		Ip:       comm.ClientIP(c.Ctx.Request()),
+	}
+	comm.SetLoginuser(c.Ctx.ResponseWriter(), &loginuser)
+	comm.Redirect(c.Ctx.ResponseWriter(), "/public/index.html?from=login")
+}
+
+func (c *IndexController) GetLogout() {
+	comm.SetLoginuser(c.Ctx.ResponseWriter(), nil)
+	comm.Redirect(c.Ctx.ResponseWriter(), "/public/index.html?from=logout")
 }
