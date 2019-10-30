@@ -183,7 +183,7 @@ func (s *giftService) getAllByCache() []models.LtGift {
 		return nil
 	}
 	// 将json数据反序列化
-	datalist := []map[string]interface{}{}
+	var datalist []map[string]interface{}
 	err = json.Unmarshal([]byte(str), &datalist)
 	if err != nil {
 		log.Println("gift_service.getAllByCache json.Unmarshal error=", err)
@@ -280,5 +280,8 @@ func (s *giftService) updateByCache(data *models.LtGift, columns []string) {
 	key := "allgift"
 	rds := datasource.InstanceCache()
 	// 删除redis中的缓存
-	rds.Do("DEL", key)
+	_, err := rds.Do("DEL", key)
+	if err != nil {
+		log.Println("gift_service.updateByCache SET key=", key, ", error=", err)
+	}
 }
