@@ -93,10 +93,10 @@ func (d *GiftDao) GetAllUse() []models.LtGift {
 			"prize_time", "img", "displayorder", "gtype", "gdata").
 		Desc("gtype").
 		Asc("displayorder").
-		Where("prize_num>=?", 0). // 有限定的奖品
-		Where("sys_status=?", 0). // 有效的奖品
+		Where("prize_num>=?", 0).    // 有限定的奖品
+		Where("sys_status=?", 0).    // 有效的奖品
 		Where("time_begin<=?", now). // 时间期内
-		Where("time_end>=?", now). // 时间期内
+		Where("time_end>=?", now).   // 时间期内
 		Find(&datalist)
 	if err != nil {
 		return datalist
