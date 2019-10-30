@@ -4,12 +4,12 @@
 package main
 
 import (
+	"LuckyDraw/project/common"
+	"LuckyDraw/project/rpc"
 	"context"
 	"flag"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"imooc.com/lottery/comm"
-	"imooc.com/lottery/rpc"
 	"net"
 	"net/url"
 	"os"
